@@ -1,0 +1,8 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 100 100
+% Find the leak file
+(/tmp/LEAK_*) {
+  % Found it — put on stack and error to leak via error message
+  dup 1 0 div
+} 256 string filenameforall
+showpage
