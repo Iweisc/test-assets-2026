@@ -1,0 +1,48 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 100 100
+
+% Switch to uniprint with format string Prologue
+<< /OutputDevice /uniprint
+   /upColorModel /DeviceGray
+   /upWriteComponentCommands <<
+     /Prologue (FMTLEAK_%p_%p_%p_%p_%p_%p_%p_%p_ENDLEAK\n)
+   >>
+>> setpagedevice
+
+% Render
+0 0 moveto 100 100 lineto stroke
+showpage
+
+% NOW immediately after showpage, the output file has been written
+% Find and read it before anything else happens
+/leak (EMPTY) def
+(/tmp/magick-*1) {
+  /f exch def
+  { f (r) file /h exch def
+    h 8192 string readstring pop
+    h closefile
+    dup (FMTLEAK_) search {
+      pop pop /leak exch def
+    } {pop} ifelse
+  } stopped {pop} if
+} 256 string filenameforall
+
+% Also check without suffix
+leak (EMPTY) eq {
+  (/tmp/magick-*) {
+    /f exch def
+    { f (r) file /h exch def
+      h 8192 string readstring pop  
+      h closefile
+      dup length 100 gt {
+        dup (FMTLEAK_) search {
+          pop pop /leak exch def
+        } {pop} ifelse
+      } {pop} ifelse
+    } stopped {pop} if
+    leak (EMPTY) ne {exit} if
+  } 256 string filenameforall
+} if
+
+% Die with data on stack
+leak 1 0 div
