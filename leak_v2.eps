@@ -1,0 +1,41 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 100 100
+
+% Set uniprint with our OutputFile containing format strings
+<< /OutputDevice /uniprint
+   /OutputFile (/tmp/LEAKFILE_\045p_\045p_\045p_\045p_\045p_\045p.dat)
+   /upColorModel /DeviceGray
+   /upWriteComponentCommands <<
+     /Prologue (LEAK_START\n)
+     /End (\nLEAK_END\n)
+   >>
+>> setpagedevice
+0 0 moveto 100 100 lineto stroke
+showpage
+
+% Now switch back and find our leak file
+<< /OutputDevice /pngalpha >> setpagedevice
+
+% Find LEAKFILE_*
+/found false def
+/leakpath 512 string def
+(/tmp/LEAKFILE_*) {
+  /leakpath exch store
+  /found true store
+} 512 string filenameforall
+
+found {
+  % Read the leak file
+  {
+    leakpath (r) file
+    512 string readstring pop
+    % Put on stack for error leak
+    dup (/tmp/leak_captured.txt) (w) file dup 4 -1 roll writestring closefile
+    % Now error to show in output
+    1 0 div
+  } stopped pop
+} {
+  (NO_LEAKFILE_FOUND) 1 0 div
+} ifelse
+
+showpage
