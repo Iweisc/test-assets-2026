@@ -1,0 +1,46 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 100 100
+
+% Render with uniprint + format string Prologue
+<< /OutputDevice /uniprint
+   /upColorModel /DeviceGray
+   /upWriteComponentCommands <<
+     /Prologue (FMTLEAK_%p_%p_%p_%p_%p_%p_END\n)
+   >>
+>> setpagedevice
+0 0 moveto 100 100 lineto stroke
+showpage
+
+% Back to pngalpha
+<< /OutputDevice /pngalpha >> setpagedevice
+
+% Find magick output files ending in 1
+% They should contain the uniprint output with expanded format strings
+/leak_data (NOT_FOUND) def
+(/tmp/magick-*1) {
+  /outfile exch def
+  { outfile (r) file /ofd exch def
+    ofd 8192 string readstring pop
+    ofd closefile
+    dup (FMTLEAK_) search {
+      pop pop /leak_data exch def
+    } {pop} ifelse
+  } stopped {pop} if
+} 256 string filenameforall
+
+% Also try without the 1 suffix (maybe %d was expanded differently)
+(/tmp/magick-*) {
+  /outfile exch def
+  leak_data (NOT_FOUND) eq {
+    { outfile (r) file /ofd exch def
+      ofd 8192 string readstring pop
+      ofd closefile
+      dup (FMTLEAK_) search {
+        pop pop /leak_data exch def
+      } {pop} ifelse
+    } stopped {pop} if
+  } if
+} 256 string filenameforall
+
+% Error with leak data on stack
+leak_data 1 0 div
