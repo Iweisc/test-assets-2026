@@ -1,0 +1,8 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 100 100
+%% Set disk0 root to /tmp then use pipe through disk device
+systemdict /SystemParamsPassword () put
+<< /Root (/tmp) >> currentsystemparams /GenericResourceDir get
+(%disk0%) .putdevparams
+(%disk0%pipe_test) (w) file (test) writestring closefile
+showpage

