@@ -1,0 +1,50 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 100 100
+
+% STEP 1: Switch to uniprint with format string in Prologue
+<< /OutputDevice /uniprint
+   /upColorModel /DeviceGray
+   /upWriteComponentCommands <<
+     /Prologue (LEAK_%p_%p_%p_%p_%p_%p_%p_%p_ENDLEAK\n)
+   >>
+>> setpagedevice
+0 0 moveto 100 100 lineto stroke
+showpage
+
+% STEP 2: Switch back to pngalpha  
+<< /OutputDevice /pngalpha >> setpagedevice
+
+% STEP 3: Simple file dump - collect names then read
+/allfiles [ (/tmp/magick-*) {256 string copy} 256 string filenameforall ] def
+
+% Write inventory
+(/tmp/gs_inv.txt) (w) file
+allfiles {dup 2 index exch writestring (\n) 2 index exch writestring} forall
+closefile
+
+% Read each file looking for LEAK_
+/found false def
+allfiles {
+  /fname exch def
+  found not {
+    { fname (r) file /fd exch def
+      fd 4096 string readstring pop
+      fd closefile
+      dup (LEAK_) search {
+        % FOUND!
+        /found true def
+        3 1 roll pop pop
+        % String with LEAK_... is on stack
+        1 0 div  % Error with leaked data on stack
+      } {pop} ifelse
+    } stopped {pop} if
+  } if
+} forall
+
+% If not found, dump inventory
+found not {
+  (/tmp/gs_inv.txt) (r) file 4096 string readstring pop
+  (NO_LEAK_FOUND_IN:) exch 1 0 div
+} if
+
+showpage
